@@ -92,7 +92,8 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
 	//   observed measurement to this particular landmark.
 	// NOTE: this method will NOT be called by the grading code. But you will probably find it useful to 
 	//   implement this method and use it as a helper during the updateWeights phase.
-    
+    // Testing Particle
+
 
 }
 
@@ -108,6 +109,12 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   and the following is a good resource for the actual equation to implement (look at equation 
 	//   3.33
 	//   http://planning.cs.uiuc.edu/node99.html
+    
+    // Go through particles
+    for(int i = 0; i < num_particles; i++) {
+        
+    }
+    
 }
 
 void ParticleFilter::resample() {
