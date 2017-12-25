@@ -48,6 +48,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
         p.theta += dist_theta(gen);
         
         particles.push_back(p);
+        
     }
     
     is_initialized = true;
@@ -118,21 +119,43 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         p.theta = particles[i].theta;
         p.weight = 1.0;
         
-        vector<LandmarkObs> map_predictions;
+        std::vector<int> associations;
+        std::vector<double> sense_x;
+        std::vector<double> sense_y;
         
+        vector<LandmarkObs> map_predictions;
+        //**Map Coordintes**
         for(int j = 0; j < observations.size(); j++) {
             LandmarkObs obs, maps;
             
             obs = observations[i];
-            
+            maps.id = 0;
             maps.x = p.x + ((obs.x * cos(p.theta)) - (obs.y * sin(p.theta)));
             maps.y = p.y + ((obs.x * sin(p.theta)) + (obs.y * cos(p.theta)));
             map_predictions.push_back(maps);
             
         }
+        // **Update Weights**
         for(int j = 0; map_predictions.size(); j++) {
+//            double distance = 100000.0;
+//            double dist_check = 0.0;
             
+            // Calculate  Normalization term with guassian
+            double norm = 1/(2*M_PI*std_landmark[0]*std_landmark[0]);
+            
+            // Calculate Exponents
+            double exp_x = ((pow((map_predictions[j].x - map_landmarks.landmark_list[map_predictions[j].id].x_f),2)/pow(std_landmark[0],2)));
+            double exp_y = ((pow((map_predictions[j].y - map_landmarks.landmark_list[map_predictions[j].id].y_f),2)/pow(std_landmark[1],2)));
+            
+            p.weight *= norm * exp(-(exp_x + exp_y));
+            
+            associations.push_back(map_landmarks.landmark_list[map_predictions[j].id].id_i);
+            sense_x.push_back(map_predictions[j].x);
+            sense_y.push_back(map_predictions[j].y);
         }
+        
+        particles[i] = SetAssociations(p, associations, sense_x, sense_y);
+        weights[i] = p.weight;
         
     }
     
@@ -152,10 +175,15 @@ Particle ParticleFilter::SetAssociations(Particle& particle, const std::vector<i
     // associations: The landmark id that goes along with each listed association
     // sense_x: the associations x mapping already converted to world coordinates
     // sense_y: the associations y mapping already converted to world coordinates
-
+    particle.associations.clear();
+    particle.sense_x.clear();
+    particle.sense_y.clear();
+    
     particle.associations= associations;
     particle.sense_x = sense_x;
     particle.sense_y = sense_y;
+    
+    return particle;
 }
 
 string ParticleFilter::getAssociations(Particle best)
