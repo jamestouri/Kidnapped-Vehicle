@@ -112,6 +112,27 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     
     // Go through particles
     for(int i = 0; i < num_particles; i++) {
+        Particle p;
+        p.x = particles[i].x;
+        p.y = particles[i].y;
+        p.theta = particles[i].theta;
+        p.weight = 1.0;
+        
+        vector<LandmarkObs> map_predictions;
+        
+        for(int j = 0; j < observations.size(); j++) {
+            LandmarkObs obs, maps;
+            
+            obs = observations[i];
+            
+            maps.x = p.x + ((obs.x * cos(p.theta)) - (obs.y * sin(p.theta)));
+            maps.y = p.y + ((obs.x * sin(p.theta)) + (obs.y * cos(p.theta)));
+            map_predictions.push_back(maps);
+            
+        }
+        for(int j = 0; map_predictions.size(); j++) {
+            
+        }
         
     }
     
