@@ -27,7 +27,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	// Add random Gaussian noise to each particle.
 	// NOTE: Consult particle_filter.h for more information about this method (and others in this file).
     is_initialized = true;
-    num_particles = 10;
+    num_particles = 5;
 
     double std_x = std[0];
     double std_y = std[1];
@@ -41,15 +41,15 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
     for(int i = 0; i < num_particles; i++) {
         Particle p;
         p.id = i;
-        p.weight = 1.0;
-        weights.push_back(1);
         
         p.x = dist_x(gen);
         p.y = dist_y(gen);
         p.theta = dist_theta(gen);
         
+        p.weight = 1.0;
         particles.push_back(p);
-        
+        weights.push_back(1);
+
     }
 //    cout << "1" << endl;
 
@@ -70,25 +70,24 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
         double std_y = std_pos[1];
         double std_theta = std_pos[2];
         
-        normal_distribution<double> pred_x(0, std_x);
-        normal_distribution<double> pred_y(0, std_y);
-        normal_distribution<double> pred_theta(0, std_theta);
-        
         double x = particles[i].x;
         double y = particles[i].y;
         double theta = particles[i].theta;
         
+        normal_distribution<double> pred_x(x, std_x);
+        normal_distribution<double> pred_y(y, std_y);
+        normal_distribution<double> pred_theta(theta, std_theta);
+        
+       
+        
         if (fabs(yaw_rate) < 0.0001) {
             x += velocity * delta_t * cos(theta);
             y += velocity * delta_t * sin(theta);
-
         }
         else {
-            x += velocity / yaw_rate * (sin(theta + yaw_rate*delta_t) - sin(theta));
-            y += velocity / yaw_rate * (cos(theta) - cos(theta + yaw_rate*delta_t));
+            x += (velocity/yaw_rate)*(sin(theta + yaw_rate * delta_t) - sin(theta));
+            y += (velocity/yaw_rate)*(cos(theta) - cos(theta + yaw_rate * delta_t));
             theta += yaw_rate * delta_t;
-        
-            
         }
         
         // Noise
@@ -135,9 +134,9 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         vector<double> sense_x;
         vector<double> sense_y;
         
-        //translate vehicle coordinate observations into map coordinates
+        // **map coordinates**
         vector<LandmarkObs> map_predictions;
-        for (int j=0; j<observations.size(); j++) {
+        for (int j = 0; j < observations.size(); j++) {
             LandmarkObs obs, map;
             obs = observations[j];
             
@@ -198,10 +197,7 @@ Particle ParticleFilter::SetAssociations(Particle& particle, const std::vector<i
 {
 //    cout << "5.1" << endl;
 
-    //particle: the particle to assign each listed association, and association's (x,y) world coordinates mapping to
-    // associations: The landmark id that goes along with each listed association
-    // sense_x: the associations x mapping already converted to world coordinates
-    // sense_y: the associations y mapping already converted to world coordinates
+   
     particle.associations.clear();
     particle.sense_x.clear();
     particle.sense_y.clear();
