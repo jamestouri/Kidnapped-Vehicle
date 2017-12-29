@@ -180,7 +180,7 @@ void ParticleFilter::resample() {
     vector<Particle> n_p;
     for (int i = 0 ; i < num_particles; i++) {
         n_p.push_back(particles[dist_p(gen)]);
-        n_p[i].id = i;
+      
     }
 //    cout << "4.3" << endl;
     particles = n_p;
